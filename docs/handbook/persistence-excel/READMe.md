@@ -5,9 +5,8 @@ title: persistence-excel
 # persistence-excel
 
 
-Quick Start
------------
-## Maven/Gradle configuration
+## 基本信息
+### Maven/Gradle configuration
 
 Add the Maven dependency:
 
@@ -24,6 +23,9 @@ Add the Gradle dependency:
 ```groovy
 implementation 'com.happy3w:persistence-excel:0.0.4'
 ```
+### git地址
+[https://github.com/boroborome/persistence-excel](https://github.com/boroborome/persistence-excel)
+
 
 ## 组件介绍
 - SheetPage Excel Sheet页

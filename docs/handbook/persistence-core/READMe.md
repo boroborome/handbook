@@ -5,9 +5,8 @@ title: persistence-core
 # persistence-core
 
 
-Quick Start
------------
-## Maven/Gradle configuration
+## 基本信息
+### Maven/Gradle configuration
 
 Add the Maven dependency:
 
@@ -24,6 +23,9 @@ Add the Gradle dependency:
 ```groovy
 implementation 'com.happy3w:persistence-core:0.0.4'
 ```
+
+### git地址
+[https://github.com/boroborome/persistence-core](https://github.com/boroborome/persistence-core)
 
 ## 组件介绍
 - RdAssistant 行数据助理，负责在处理以行为单位的文件数据，比如excel,csv

@@ -5,9 +5,8 @@ title: persistence-jpa
 # persistence-jpa
 
 
-Quick Start
------------
-## Maven/Gradle configuration
+## 基本信息
+### Maven/Gradle configuration
 
 Add the Maven dependency:
 
@@ -24,6 +23,9 @@ Add the Gradle dependency:
 ```groovy
 implementation 'com.happy3w:persistence-jpa:0.0.1'
 ```
+
+### git地址
+[https://github.com/boroborome/persistence-jpa](https://github.com/boroborome/persistence-jpa)
 
 ## 组件介绍
 - JpaAssistant

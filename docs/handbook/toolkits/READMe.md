@@ -5,8 +5,8 @@ title: toolkits
 
 # toolkits 
 
-## Quick Start
------------
+## 基本信息
+
 ### Maven/Gradle configuration
 
 Add the Maven dependency:
@@ -24,6 +24,9 @@ Add the Gradle dependency:
 ```groovy
 implementation 'com.happy3w:toolkits:0.0.6'
 ```
+
+### git地址
+[https://github.com/boroborome/toolkits](https://github.com/boroborome/toolkits)
 
 ## 组件介绍
 
