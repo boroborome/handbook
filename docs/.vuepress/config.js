@@ -15,7 +15,6 @@ module.exports = {
             },
         ],
         sidebar: [
-            '/handbook/',
             '/handbook/toolkits/',
             '/handbook/persistence-core/',
             '/handbook/persistence-jpa/',
