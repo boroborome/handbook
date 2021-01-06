@@ -28,13 +28,11 @@ implementation 'com.happy3w:persistence-core:0.0.4'
 [https://github.com/boroborome/persistence-core](https://github.com/boroborome/persistence-core)
 
 ## 组件介绍
-- RdAssistant 行数据助理，负责在处理以行为单位的文件数据，比如excel,csv
-- ObjRdTableDef 定义对象行数据表，就是将一个对象表示为一个一行数据的结构
-- RdTableDef 一个自定义的行数据，对于没有对象，只是单纯的直接访问excel或者csv时，可以使用这个对象
-- IDataPage 数据页接口。用于访问一个excel sheet或者一个csv文件。
 
 ### RdAssistant
-行数据助手，提供从page读写行数据的常用方法，方法命名规则如下:{Action}{DataType}
+行数据助理，负责在处理以行为单位的文件数据，比如excel,csv。
+
+提供从page读写行数据的常用方法，方法命名规则如下:{Action}{DataType}
 - Action范围
   - read: 从page读取数据操作
   - write: 将数据写入page功能
@@ -46,11 +44,19 @@ implementation 'com.happy3w:persistence-core:0.0.4'
 - Tag范围
   - Cfg:表示需要通过特定配置输出
   
+使用时通过如下代码就可以方便的读取数据
+```java
+IRdTableDef rdTableDef = ...//某个数据定义
+IReadDataPage page = ...//某个可以读数据的页面信息
+// 读取所有数据
+MessageRecorder messageRecorder = new MessageRecorder();
+Stream<MyData> datas = RdAssistant.readObjs(rdTableDef, page, messageRecorder);
+```
 
-Demo可以参见Excel读取的Demo https://github.com/boroborome/persistence-excel
+具体Demo可以参见 [Excel读取的Demo](/handbook/persistence-excel.html#sheetpage)
 
 ### ObjRdTableDef
-这个名字是：ObjectRowDataTableDefinition的缩写。
+这个名字是：Object Row Data Table Definition 的缩写，它用于定义一个可以用一行表示一个对象的信息，也叫对象行数据表。
 
 这里将Excel或者CSV当做一个表，这个表的特点是，每行都是独立的一个数据，所以称这种表为：行数据表。
 
@@ -151,12 +157,21 @@ public class DateFormatCfg implements IAnnotationRdConfig<DateFormat> { // 这�
 }
 ```
 
-### RdTableDef
-这是一个单纯的行数据表定义，直接添加需要管理的列以及需要的定制配置信息即可。访问文件时使用List&lt;Object>作为一行数据。
+### ListRdTableDef
+一个自定义的行数据，对于没有对象，只是单纯的直接访问excel或者csv时，可以使用这个对象。
+使用时直接添加需要管理的列以及需要的定制配置信息即可。访问文件时使用List&lt;Object>作为一行数据。
+
+适用于将统计数据输出到文件，或者自定制输出内容场景。
+
+
+### MapRdTableDef
+一个自定义的行数据，对于没有对象，只是单纯的直接访问excel或者csv时，可以使用这个对象。
+使用时直接添加需要管理的列以及需要的定制配置信息即可。访问文件时使用Map&lt;String, Object>作为一行数据。
 
 适用于将统计数据输出到文件，或者自定制输出内容场景。
 
 ### IDataPage
+数据页接口。用于访问一个excel sheet或者一个csv文件。
 这个接口是对文件的抽象，根据具体使用情况可以实现读接口IReadDataPage和写接口IWriteDataPage。
 
 在persistence-excel中，SheetPage操作的是内存Dom所以同时实现了两个接口，但是在csv的访问中，会出现ReadPage和WritePage。

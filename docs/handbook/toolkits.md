@@ -32,33 +32,46 @@ implementation 'com.happy3w:toolkits:0.0.6'
 
 ### TypeConverter
 
-这是一个负责转换常用数据类型的工具。当前支持的类型有Boolean,Date,Double,Enum,Integer,Long,String.TypeConverter是线程安全的数据转换器。
+此组件实现了简单数据类型之间的双向转换。当前支持的类型有
+- Boolean
+- Date
+- Double
+- Enum
+- Integer
+- Long
+- String
+  
+TypeConverter是线程安全的数据转换器，且可以根据需要扩展转换规则和数据类型。
 
 #### 一般用法
+下面代码分别将字符串和数字转换为时间类型，得到的两个日期是一样的。
 ```java
 Date d1 = TypeConverter.INSTANCE.convert("2019-09-01 12:00:00", Date.class);
 Date d2 = TypeConverter.INSTANCE.convert(1567310400000l, Date.class);
 Assert.assertEquals(d1, d2);
 ```
-上面代码得到的两个日期是一样的。
 
-#### 调整配置
+#### 调整转换规则
+下面代码修改了字符串和时间类型的转换格式。
 ```java
 TypeConverter.INSTANCE
-    .findTci(DateStrBiTci.class)            // 找到时间与字符串之间的双向TypeConvertItem
-    .appendConfig("MM/dd/yyyy HH:mm:ss")    // 支持解析这种格式
-    .defaultConfig("yyyy-MM-dd HH:mm:ss");  // 支持解析这种格式，同时配置时间转换成字符串使用这个格式
+    // 找到时间与字符串之间的双向TypeConvertItem
+    .findTci(DateStrBiTci.class)
+    // 增加新的时间格式。转换器在从字符串到时间转换的时候可以同时支持多种字符串格式。
+    .appendConfig("MM/dd/yyyy HH:mm:ss")
+    // 设置默认的时间格式。这个格式会用于将时间转换为字符串。
+    .defaultConfig("yyyy-MM-dd HH:mm:ss");
 
 Date d1 = TypeConverter.INSTANCE.convert("2019-09-01 12:00:00", Date.class);
 Date d2 = TypeConverter.INSTANCE.convert("09/01/2019 12:00:00", Date.class);
 Assert.assertEquals(d1, d2);
 
-Assert.assertEquals("2019-09-01 12:00:00", TypeConverter.INSTANCE
-    .convert(d2, String.class));
+Assert.assertEquals("2019-09-01 12:00:00", 
+    TypeConverter.INSTANCE.convert(d2, String.class));
 ```
 
 #### 定制自己的转换规则
-
+通过在TypeConverter中注册ITypeConvertItem即可增加或者修改某个特定数据类型的转换规则。
 ```java
 TypeConverter.INSTANCE
     .regist(new ITypeConvertItem<SourceType, TargetType>(){...})
@@ -73,8 +86,9 @@ ITypeConvertItem类型仅仅负责数据的单向转换，如果要做双向转�
 #### 多个转换器并存
 TypeConverter是一个可以随意实例化的对象，所以可以创建多个TypeConverter，分别使用不同的转换规则。直接new出来的TypeConverter不包含任何规则，通过TypeConverter.INSTANCE.newCopy()得到新的TypeConverter是复制了转换规则的转换器。转换规则是通过引用到新的转换器的，因此配置变化会在两个TypeConverter上生效，如果想要在一个转换器上面生效，还是需要通过重新注册规则的方式操作。
 
-***注意***
+::: warning
 类似日期格式"yyyy-MM-dd"和"MM-dd-yyyy"不能同时设置，由于SimpleDateFormat在解析的时候没有检测具体数字位数，所以可能会解析结果错误。
+:::
 
 
 ### MessageRecorder 组件
