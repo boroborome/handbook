@@ -15,14 +15,14 @@ Add the Maven dependency:
 <dependency>
     <groupId>com.happy3w</groupId>
     <artifactId>toolkits</artifactId>
-    <version>0.0.6</version>
+    <version>0.0.7</version>
 </dependency>
 ```
 
 Add the Gradle dependency:
 
 ```groovy
-implementation 'com.happy3w:toolkits:0.0.6'
+implementation 'com.happy3w:toolkits:0.0.7'
 ```
 
 ### git地址
@@ -212,6 +212,71 @@ EasyIterator.from(studentStream)                                                
 //  .toMapList(v -> createKey(v));                                                  // 生成一个key,List<value>的map，key相同的value分组到一个列表中了
 
 ```
+### EasyPipe 组件
+功能类似Stream，但是更加的强劲，支持了数据的分流处理。
+创建一个EasyPipe的方法有多种
+```java
+EasyPipe pipe1 = EasyPipe.of(InputType.class)   // 通过of方法得到一个接收InputType的流的Builder。
+    .map(...)                                   // 增加类似map,filter等各种转换逻辑，这些过程返回的是Pipe的builder，不是能使用的pipe
+    .split(1000)
+    .flatMap(...)
+    .filter(...)
+    .forEach(...);                              // 最后增加消费pipe中数据的逻辑，此时才会得到最后的EasyPipe对象
+
+EasyPipe pipe2 = EasyPipe.of(InputType.class) 
+    .map(...)
+    .next(pipe1);                               // 最后将当前pipe和pipe1连接得到pipe2
+
+EasyPipe pipe3 = EasyPipe.map(...)              // 为了简化创建EasyPipe的流程，增加了直接从map，filter等功能开始的构建方式
+    ...
+    .next(EasyPipe.end());                      // 通过EasyPipe.end()支持直接忽略最终结果的pipe
+```
+
+下面通过一个例子展现使用方法。下面代码需要实现的功能是，解析Excel，将没有问题的数据入库，将有问题的数据存为另一个Excel，然后让用户自行下载，修改后重新上传。
+```java
+// 1. 使用SheetAgency解析Excel文件中所有Sheet页，将Excel中数据转换为EasyIterator。这里暂时不讲SheetAgency
+// rowDataType是一行记录对应的数据类型
+
+MessageRecorder messageRecorder = new MessageRecorder();
+ObjRdTableDef<T> objectDefinition = ObjRdTableDef.from(rowDataType);
+Workbook workbook = ExcelUtil.openWorkbook(data.getDataStream());
+IEasyIterator<RdRowWrapper<T>> dataIt = ExcelAssistant.readRowsIt(objectDefinition, workbook, messageRecorder);  // 从Excel中逐行读取数据
+
+// 2. 定义一个负责处理错误数据的pipe。这里ErrorReceiver是一个自定义的将数据写入Excle的pipe。需要实现初始化Excle，写Excel数据，保存文件等操作，之类暂时不提
+IEasyPipe<ClassifyResult<T, String>> saveFailedPipe = new ErrorReceiver(...);
+
+// 3. 定义主要的业务流程。这里展示了EasyPipe的map, filter, peek, split, forEach 方法
+IEasyPipe<RdRowWrapper<T>> pipe = EasyPipe.<RdRowWrapper<T>, ClassifyResult<T, String>> // 这里标注的类型为map方法将要将什么类型转化为什么类型。IDE的类型推断能力有限，放在这里仅仅为了解决编译问题
+        map(w -> new ClassifyResult<>((T) w.getData(), w.getError()))       // 将Excel中一行数据转换为分类数据结构，Tag中保存错误消息。
+        .filter(c -> StringUtils.isEmpty(c.getTag()), saveFailedPipe)       // *过滤没有任何错误消息的行，其他行发送到saveFailedPipe
+        .peek(entity -> regularizeEntity(entity, easyDataDefine, messageRecorder) // 执行其他对数据进行格式化的逻辑
+        .filter(c -> StringUtils.isEmpty(c.getTag()), saveFailedPipe)       // *过滤没有任何错误消息的行，其他行发送到saveFailedPipe
+        .split(1000)  // 按照1000行来对数据分组
+        .flatMap(lstData -> checkDuplicate(lstData, easyDataDefine))        // 检测这组数据中内容是否重复了
+        .filter(c -> StringUtils.isEmpty(c.getTag()), saveFailedPipe)       // *过滤没有任何错误消息的行，其他行发送到saveFailedPipe
+        .map(ClassifyResult::getData)   // 取出所有数据
+        .split(1000)  // 按照1000行来对有效数据分组
+        .peek(dataList -> saveToDatabase(dataList, easyDataDefine, task))   // 将数据按照组保存到数据库
+        .forEach(dataList -> easyDataDefine.afterCreateEntity(dataList));   // 将数据按照组执行其他后处理事件
+pipe.accept(dataIt);        // *将Excel中数据放入EasyPipe中，按照逻辑处理
+pipe.flush();               // Flush最后的数据
+
+// 4. 如果上面流程处理成功了，则执行其他逻辑
+if (!messageRecorder.isSuccess()) {
+    ...
+}
+```
+上面代码使用filter做了分流，这种分流方式适合使用代码逻辑检测的分流场景。如果是一个枚举值，不同值有不同的处理，可以采用下面方法
+```java
+IEasyPipe<ClassifyResult<T, String>> pipe = createPipe();
+
+pipe.classify(ClassifyResult::getTag)   // 确定分类使用的值
+    .pipe("Status1", Pipe1)             // 如果tag为Status1，则使用Pipe1
+    .pipe("Status2", Pipe2)             // 如果tag为Status2，则使用Pipe2
+    .others()                           // 其他值进入后面的逻辑
+    .map(...)
+    ...
+```
 
 ### utils 组件
 各种常用小工具的集合
@@ -239,6 +304,9 @@ EasyIterator.from(studentStream)                                                
 
 
 ## Version Logs
+### 0.0.7
+- 升级TypeConverter转换日期的逻辑，TypeConverter会匹配最为匹配的日期格式
+- 升级FieldAccessor，使其可以访问子类字段
 ### 0.0.6
 - 修复TypeConverter中bugs
 - 强化EasyIterator

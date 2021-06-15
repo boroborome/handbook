@@ -14,14 +14,14 @@ Add the Maven dependency:
 <dependency>
     <groupId>com.happy3w</groupId>
     <artifactId>persistence-core</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
 </dependency>
 ```
 
 Add the Gradle dependency:
 
 ```groovy
-implementation 'com.happy3w:persistence-core:0.0.4'
+implementation 'com.happy3w:persistence-core:0.0.5'
 ```
 
 ### git地址
@@ -220,5 +220,14 @@ public interface IWriteDataPage<T extends IWriteDataPage<T>> extends IDataPage<T
 ```
 
 ## 历史
+
+### 0.0.5
+- 优化使用体验ExtConfig更容易使用
+- 修复RdRowIterator的NullPointer异常
+- 重构IDataPage，多数逻辑拆分到IReadDataPage和IWriteDataPage
+- 丰富自定义过滤条件IFilter。实现了String,Int,Range,Date等过滤条件
+- 完善IDbAssistant
+- 扩展读取表数据逻辑，支持动态表头
+- 增强ObjRdTableDef,使其识别注解在子类上的注解。
 ### 0.0.4
 - 修改过滤条件为正向命名

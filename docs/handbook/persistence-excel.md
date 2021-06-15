@@ -14,14 +14,14 @@ Add the Maven dependency:
 <dependency>
     <groupId>com.happy3w</groupId>
     <artifactId>persistence-excel</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
 </dependency>
 ```
 
 Add the Gradle dependency:
 
 ```groovy
-implementation 'com.happy3w:persistence-excel:0.0.4'
+implementation 'com.happy3w:persistence-excel:0.0.5'
 ```
 ### git地址
 [https://github.com/boroborome/persistence-excel](https://github.com/boroborome/persistence-excel)
@@ -199,5 +199,9 @@ List<MyData> datas = ExcelAssistant.readRows(objRdTableDef, workbook, messageRec
 
 ```
 ## 历史
+
+### 0.0.5
+- 支持从Excel读取数据为通用的List或者Map
+- 解析Excel的时候时间类型支持空单元格
 ### 0.0.4
 - 升级libs，修复数据转换的bug
